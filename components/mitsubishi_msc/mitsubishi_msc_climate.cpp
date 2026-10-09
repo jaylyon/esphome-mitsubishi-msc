@@ -78,7 +78,8 @@ void MitsubishiMSCClimate::transmit_state() {
       break;
   }
 
-  uint8_t temperature = (uint8_t) clamp(this->target_temperature, this->min_temperature_, this->max_temperature_);
+  uint8_t temperature = msc_temperature_from_celsius(
+      clamp(this->target_temperature, this->min_temperature_, this->max_temperature_));
 
   uint8_t frame[MSC_FRAME_LEN];
   msc_build_frame(frame, power, mode, temperature, fan_speed, this->vane_position_);

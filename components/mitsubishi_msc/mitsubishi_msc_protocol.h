@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 
@@ -85,6 +86,15 @@ constexpr size_t MSC_VANE_OPTIONS_COUNT = sizeof(MSC_VANE_OPTIONS) / sizeof(MSC_
 // Valid target range: byte 7 is 31 - T, so T must be 16..31 C.
 constexpr uint8_t MSC_TEMP_MIN_C = 16;
 constexpr uint8_t MSC_TEMP_MAX_C = 31;
+
+// Home Assistant in Fahrenheit sends fractional Celsius (75 F = 23.89 C); round to the nearest whole degree.
+inline uint8_t msc_temperature_from_celsius(float celsius) {
+  if (!(celsius > MSC_TEMP_MIN_C))
+    return MSC_TEMP_MIN_C;
+  if (celsius >= MSC_TEMP_MAX_C)
+    return MSC_TEMP_MAX_C;
+  return (uint8_t) std::lround(celsius);
+}
 
 inline uint8_t msc_checksum(const uint8_t *frame) {
   uint8_t sum = 0;

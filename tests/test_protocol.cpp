@@ -55,6 +55,15 @@ int main() {
   msc_build_frame(frame, MSC_POWER_ON, MSC_MODE_COOL, 5, MSC_FAN_AUTO, MSC_VANE_AUTO);
   CHECK(frame[7] == 15);
 
+  // Fahrenheit setpoints arrive as fractional Celsius and must round, not truncate.
+  CHECK(msc_temperature_from_celsius(23.89f) == 24);  // 75 F
+  CHECK(msc_temperature_from_celsius(25.0f) == 25);   // 77 F
+  CHECK(msc_temperature_from_celsius(22.78f) == 23);  // 73 F
+  CHECK(msc_temperature_from_celsius(23.33f) == 23);  // 74 F
+  CHECK(msc_temperature_from_celsius(21.67f) == 22);  // 71 F
+  CHECK(msc_temperature_from_celsius(5.0f) == 16);
+  CHECK(msc_temperature_from_celsius(40.0f) == 31);
+
   // Fan values from the physical unit.
   CHECK(MSC_FAN_AUTO == 0x00 && MSC_FAN_LOW == 0x02 && MSC_FAN_MEDIUM == 0x03 && MSC_FAN_HIGH == 0x05);
 
