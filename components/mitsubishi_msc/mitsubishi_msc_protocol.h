@@ -41,6 +41,7 @@ constexpr uint8_t MSC_PREFIX[5] = {0x23, 0xCB, 0x26, 0x01, 0x00};
 constexpr uint8_t MSC_POWER_ON = 0x24;
 constexpr uint8_t MSC_POWER_OFF = 0x20;
 constexpr uint8_t MSC_POWER_ON_BIT = 0x04;
+constexpr uint8_t MSC_POWER_REMOTE_FLAG = 0x80;  // real remotes send 0xA4 / 0xA0; the HeatpumpIR library omits it
 
 // Operating mode (byte 6, low nibble)
 constexpr uint8_t MSC_MODE_HEAT = 0x01;

@@ -36,6 +36,10 @@ int main() {
   msc_build_frame(frame, MSC_POWER_OFF, MSC_MODE_AUTO, 24, MSC_FAN_AUTO, MSC_VANE_AUTO);
   CHECK((frame[5] & MSC_POWER_ON_BIT) == 0);
 
+  // The remote-style power byte (0xA4/0xA0) is the plain one plus the 0x80 flag.
+  CHECK((MSC_POWER_ON | MSC_POWER_REMOTE_FLAG) == 0xA4);
+  CHECK((MSC_POWER_OFF | MSC_POWER_REMOTE_FLAG) == 0xA0);
+
   // A corrupted frame must be rejected.
   uint8_t bad[MSC_FRAME_LEN];
   std::memcpy(bad, capture, MSC_FRAME_LEN);

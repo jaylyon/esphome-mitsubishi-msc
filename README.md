@@ -115,6 +115,7 @@ select:
 | `receiver_id` | optional | `remote_receiver`; enables remote-to-HA sync |
 | `min_temperature` | `17` | Lowest setpoint, 16-31 C (also clamps transmitted values) |
 | `max_temperature` | `30` | Highest setpoint, 16-31 C |
+| `power_flag` | `false` | Send `0xA4`/`0xA0` in the power byte like real remotes do, instead of `0x24`/`0x20`. Try it if a unit obeys its remote but ignores commands from ESPHome |
 | `supports_heat` | `false` | Expose Heat mode. Untested; the target units are cooling-only |
 | `sensor` | optional | Optional external temperature sensor, as for other `climate_ir` platforms |
 

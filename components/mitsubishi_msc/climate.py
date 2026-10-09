@@ -10,6 +10,8 @@ AUTO_LOAD = ["climate_ir"]
 
 CODEOWNERS = ["@jaylyon"]
 
+CONF_POWER_FLAG = "power_flag"
+
 
 def _default_visual(config: ConfigType) -> ConfigType:
     # Seed the visual min/max shown in Home Assistant from the same
@@ -36,6 +38,8 @@ CONFIG_SCHEMA = cv.All(
         {
             # These units are cooling-only; override the climate_ir default of True.
             cv.Optional(CONF_SUPPORTS_HEAT, default=False): cv.boolean,
+            # Send the 0x80 bit in the power byte like real remotes do (0xA4/0xA0 instead of 0x24/0x20).
+            cv.Optional(CONF_POWER_FLAG, default=False): cv.boolean,
             cv.Optional(CONF_MIN_TEMPERATURE, default=17): _PROTOCOL_TEMPERATURE,
             cv.Optional(CONF_MAX_TEMPERATURE, default=30): _PROTOCOL_TEMPERATURE,
         }
@@ -49,3 +53,4 @@ async def to_code(config: ConfigType) -> None:
     var = await climate_ir.new_climate_ir(config)
     cg.add(var.set_min_temperature(config[CONF_MIN_TEMPERATURE]))
     cg.add(var.set_max_temperature(config[CONF_MAX_TEMPERATURE]))
+    cg.add(var.set_power_flag(config[CONF_POWER_FLAG]))

@@ -20,6 +20,7 @@ class MitsubishiMSCClimate : public climate_ir::ClimateIR {
 
   void set_min_temperature(float min_temperature) { this->min_temperature_ = min_temperature; }
   void set_max_temperature(float max_temperature) { this->max_temperature_ = max_temperature; }
+  void set_power_flag(bool power_flag) { this->power_flag_ = power_flag; }
 
   // Wired up by the `mitsubishi_msc` select platform so that received vane
   // state can be reflected back into Home Assistant.
@@ -35,6 +36,7 @@ class MitsubishiMSCClimate : public climate_ir::ClimateIR {
 
   float min_temperature_{17};
   float max_temperature_{30};
+  bool power_flag_{false};
   uint8_t vane_position_{0x00};  // MSC_VANE_AUTO
   MitsubishiMSCVaneSelect *vane_select_{nullptr};
 };

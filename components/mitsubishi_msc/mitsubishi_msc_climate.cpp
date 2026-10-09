@@ -57,6 +57,9 @@ void MitsubishiMSCClimate::transmit_state() {
       break;
   }
 
+  if (this->power_flag_)
+    power |= MSC_POWER_REMOTE_FLAG;
+
   // Fix for the generic ESPHome heatpumpir wrapper's fan mapping bug (it sends
   // FAN_2/FAN_3/FAN_4, which only line up correctly for protocols with 4+ fan
   // speeds). This protocol has exactly 3 real speeds, confirmed against the
