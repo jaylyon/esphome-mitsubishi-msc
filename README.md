@@ -16,7 +16,10 @@ and does not depend on the HeatpumpIR library.
 1. **Fan speeds are shifted.** The stock `heatpumpir` platform sends
    `FAN_2/FAN_3/FAN_4` for Low/Medium/High on every protocol. The MSC protocol
    only has three speeds (`FAN_1`..`FAN_3`), so Low behaves like Medium, Medium
-   like High, and High falls back to Auto.
+   like High, and High falls back to Auto. Reported upstream as
+   [esphome/esphome#20429](https://github.com/esphome/esphome/issues/20429);
+   the same kind of bug is being fixed for Mitsubishi Heavy ZJ/ZMP in
+   [#16877](https://github.com/esphome/esphome/pull/16877).
 2. **Vane control is limited.** Home Assistant's climate swing modes
    (off/vertical/horizontal/both) can't represent the remote's 7 vane positions.
 3. **No receive support.** If someone uses the remote, Home Assistant never
