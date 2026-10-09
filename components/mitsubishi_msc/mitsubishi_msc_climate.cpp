@@ -82,6 +82,9 @@ void MitsubishiMSCClimate::transmit_state() {
 
   uint8_t frame[MSC_FRAME_LEN];
   msc_build_frame(frame, power, mode, temperature, fan_speed, this->vane_position_);
+  ESP_LOGD(TAG, "Sending Mitsubishi MSC frame: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X",
+           frame[0], frame[1], frame[2], frame[3], frame[4], frame[5], frame[6], frame[7], frame[8], frame[9],
+           frame[10], frame[11], frame[12], frame[13]);
 
   auto call = this->transmitter_->transmit();
   auto *data = call.get_data();
