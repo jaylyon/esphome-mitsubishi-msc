@@ -11,6 +11,7 @@ CONF_MITSUBISHI_MSC_ID = "mitsubishi_msc_id"
 
 MitsubishiMSCVaneSelect = mitsubishi_msc_ns.class_("MitsubishiMSCVaneSelect", select.Select)
 
+# Names must match MSC_VANE_OPTIONS in mitsubishi_msc_protocol.h exactly; the C++ side looks them up by string.
 VANE_OPTIONS = [
     "Auto",
     "Highest",

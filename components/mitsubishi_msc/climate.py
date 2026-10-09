@@ -20,16 +20,27 @@ def _default_visual(config: ConfigType) -> ConfigType:
     return config
 
 
+def _check_temperature_range(config: ConfigType) -> ConfigType:
+    if config[CONF_MIN_TEMPERATURE] > config[CONF_MAX_TEMPERATURE]:
+        raise cv.Invalid(
+            f"{CONF_MIN_TEMPERATURE} must not be greater than {CONF_MAX_TEMPERATURE}"
+        )
+    return config
+
+
+# The protocol encodes the setpoint as 31 - T in one byte, so only 16..31 C is valid.
+_PROTOCOL_TEMPERATURE = cv.All(cv.temperature, cv.float_range(min=16, max=31))
+
 CONFIG_SCHEMA = cv.All(
     climate_ir.climate_ir_with_receiver_schema(MitsubishiMSCClimate).extend(
         {
             # These units are cooling-only; override the climate_ir default of True.
             cv.Optional(CONF_SUPPORTS_HEAT, default=False): cv.boolean,
-            cv.Optional(CONF_MIN_TEMPERATURE, default=17): cv.temperature,
-            cv.Optional(CONF_MAX_TEMPERATURE, default=30): cv.temperature,
+            cv.Optional(CONF_MIN_TEMPERATURE, default=17): _PROTOCOL_TEMPERATURE,
+            cv.Optional(CONF_MAX_TEMPERATURE, default=30): _PROTOCOL_TEMPERATURE,
         }
     ),
-    cv.Any(cv.only_with_arduino, cv.only_on_esp32),
+    _check_temperature_range,
     _default_visual,
 )
 

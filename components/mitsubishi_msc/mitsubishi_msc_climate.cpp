@@ -80,22 +80,8 @@ void MitsubishiMSCClimate::transmit_state() {
 
   uint8_t temperature = (uint8_t) clamp(this->target_temperature, this->min_temperature_, this->max_temperature_);
 
-  uint8_t frame[MSC_FRAME_LEN] = {0};
-  frame[0] = MSC_PREFIX[0];
-  frame[1] = MSC_PREFIX[1];
-  frame[2] = MSC_PREFIX[2];
-  frame[3] = MSC_PREFIX[3];
-  frame[4] = MSC_PREFIX[4];
-  frame[5] = power;
-  frame[6] = mode;
-  frame[7] = 31 - temperature;
-  frame[8] = fan_speed | this->vane_position_;
-  // bytes 9-12 stay 0x00, matching every capture from the original remote
-
-  uint8_t checksum = 0;
-  for (uint8_t i = 0; i < MSC_FRAME_LEN - 1; i++)
-    checksum += frame[i];
-  frame[MSC_FRAME_LEN - 1] = checksum;
+  uint8_t frame[MSC_FRAME_LEN];
+  msc_build_frame(frame, power, mode, temperature, fan_speed, this->vane_position_);
 
   auto call = this->transmitter_->transmit();
   auto *data = call.get_data();
@@ -141,14 +127,10 @@ bool MitsubishiMSCClimate::on_receive(remote_base::RemoteReceiveData data) {
   if (!data.expect_mark(MSC_BIT_MARK))
     return false;
 
-  if (frame[0] != MSC_PREFIX[0] || frame[1] != MSC_PREFIX[1] || frame[2] != MSC_PREFIX[2] ||
-      frame[3] != MSC_PREFIX[3] || frame[4] != MSC_PREFIX[4])
+  if (!msc_frame_has_prefix(frame))
     return false;
 
-  uint8_t checksum = 0;
-  for (uint8_t i = 0; i < MSC_FRAME_LEN - 1; i++)
-    checksum += frame[i];
-  if (checksum != frame[MSC_FRAME_LEN - 1]) {
+  if (!msc_frame_checksum_ok(frame)) {
     ESP_LOGW(TAG, "Discarding Mitsubishi MSC frame with bad checksum");
     return false;
   }
@@ -162,7 +144,10 @@ bool MitsubishiMSCClimate::on_receive(remote_base::RemoteReceiveData data) {
   } else {
     switch (frame[6] & 0x0F) {
       case MSC_MODE_HEAT:
-        this->mode = climate::CLIMATE_MODE_HEAT;
+        if (this->supports_heat_)
+          this->mode = climate::CLIMATE_MODE_HEAT;
+        else
+          ESP_LOGW(TAG, "Ignoring Heat mode from remote (supports_heat is false)");
         break;
       case MSC_MODE_DRY:
         this->mode = climate::CLIMATE_MODE_DRY;

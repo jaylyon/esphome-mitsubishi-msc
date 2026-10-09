@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+
 // Ground-truth Mitsubishi "MSC" IR protocol constants, reverse-engineered from
 // captures of the original remote for MS09TW / MS17TN indoor units (KP1A-style
 // remote). These match the tonia/HeatpumpIR library's MitsubishiMSCHeatpumpIR
@@ -78,6 +81,45 @@ constexpr VaneOption MSC_VANE_OPTIONS[] = {
     {"Swing", MSC_VANE_SWING},
 };
 constexpr size_t MSC_VANE_OPTIONS_COUNT = sizeof(MSC_VANE_OPTIONS) / sizeof(MSC_VANE_OPTIONS[0]);
+
+// Valid target range: byte 7 is 31 - T, so T must be 16..31 C.
+constexpr uint8_t MSC_TEMP_MIN_C = 16;
+constexpr uint8_t MSC_TEMP_MAX_C = 31;
+
+inline uint8_t msc_checksum(const uint8_t *frame) {
+  uint8_t sum = 0;
+  for (uint8_t i = 0; i < MSC_FRAME_LEN - 1; i++)
+    sum += frame[i];
+  return sum;
+}
+
+// `power` is the raw byte 5 value; `temperature_c` is clamped to 16..31.
+inline void msc_build_frame(uint8_t *frame, uint8_t power, uint8_t mode, uint8_t temperature_c, uint8_t fan,
+                            uint8_t vane) {
+  if (temperature_c < MSC_TEMP_MIN_C)
+    temperature_c = MSC_TEMP_MIN_C;
+  if (temperature_c > MSC_TEMP_MAX_C)
+    temperature_c = MSC_TEMP_MAX_C;
+  for (uint8_t i = 0; i < MSC_FRAME_LEN; i++)
+    frame[i] = 0;
+  for (uint8_t i = 0; i < sizeof(MSC_PREFIX); i++)
+    frame[i] = MSC_PREFIX[i];
+  frame[5] = power;
+  frame[6] = mode;
+  frame[7] = MSC_TEMP_MAX_C - temperature_c;
+  frame[8] = fan | vane;
+  frame[MSC_FRAME_LEN - 1] = msc_checksum(frame);
+}
+
+inline bool msc_frame_has_prefix(const uint8_t *frame) {
+  for (uint8_t i = 0; i < sizeof(MSC_PREFIX); i++) {
+    if (frame[i] != MSC_PREFIX[i])
+      return false;
+  }
+  return true;
+}
+
+inline bool msc_frame_checksum_ok(const uint8_t *frame) { return msc_checksum(frame) == frame[MSC_FRAME_LEN - 1]; }
 
 }  // namespace mitsubishi_msc
 }  // namespace esphome

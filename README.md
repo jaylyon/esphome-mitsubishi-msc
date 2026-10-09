@@ -113,8 +113,8 @@ select:
 |---|---|---|
 | `transmitter_id` | required | `remote_transmitter` to send IR with |
 | `receiver_id` | optional | `remote_receiver`; enables remote-to-HA sync |
-| `min_temperature` | `17` | Lowest setpoint (also clamps transmitted values) |
-| `max_temperature` | `30` | Highest setpoint |
+| `min_temperature` | `17` | Lowest setpoint, 16-31 C (also clamps transmitted values) |
+| `max_temperature` | `30` | Highest setpoint, 16-31 C |
 | `supports_heat` | `false` | Expose Heat mode. Untested; the target units are cooling-only |
 | `sensor` | optional | Optional external temperature sensor, as for other `climate_ir` platforms |
 
@@ -183,6 +183,16 @@ Example, powered on, Cool, 24 C, fan Low, vane Highest:
   modelled.
 - There is no current-temperature reading from the AC, because the protocol is
   one-way. Use the optional `sensor` option if you want one.
+
+## Development
+
+The frame helpers (checksum, frame building, validation) live in
+`components/mitsubishi_msc/mitsubishi_msc_protocol.h` and have a host-side test
+that needs only a C++ compiler. It rebuilds a real captured frame byte-for-byte:
+
+```bash
+g++ -std=c++17 -Wall -Wextra -I components/mitsubishi_msc tests/test_protocol.cpp -o /tmp/test_protocol && /tmp/test_protocol
+```
 
 ## Credits
 
