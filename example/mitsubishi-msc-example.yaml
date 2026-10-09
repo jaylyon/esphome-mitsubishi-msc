@@ -1,0 +1,51 @@
+# Example for one unit. Copy secrets.example.yaml to secrets.yaml first.
+external_components:
+  - source: github://jaylyon/esphome-mitsubishi-msc
+    components: [mitsubishi_msc]
+
+esphome:
+  name: living-room-ac
+  friendly_name: Living Room AC
+
+esp32:
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+ota:
+  - platform: esphome
+
+remote_receiver:
+  id: ir_receiver
+  pin:
+    number: GPIO1
+    inverted: true        # the Unit IR receiver output is active-low
+    mode:
+      input: true
+      pullup: true
+  tolerance: 55%
+
+remote_transmitter:
+  id: ir_transmitter
+  pin: GPIO2
+  carrier_duty_percent: 50%
+  non_blocking: true
+
+climate:
+  - platform: mitsubishi_msc
+    id: ac
+    name: None
+    receiver_id: ir_receiver
+    transmitter_id: ir_transmitter
+    min_temperature: 17
+    max_temperature: 30
+
+select:
+  - platform: mitsubishi_msc
+    mitsubishi_msc_id: ac
+    name: "Vertical Vane"
