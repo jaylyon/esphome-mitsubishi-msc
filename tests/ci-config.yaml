@@ -1,0 +1,42 @@
+# Minimal config used by CI to validate and compile the component. No secrets needed.
+esphome:
+  name: msc-ci
+  friendly_name: MSC CI
+
+esp32:
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+
+remote_receiver:
+  id: ir_receiver
+  pin:
+    number: GPIO1
+    inverted: true
+    mode:
+      input: true
+      pullup: true
+  tolerance: 55%
+
+remote_transmitter:
+  id: ir_transmitter
+  pin: GPIO2
+  carrier_duty_percent: 50%
+  non_blocking: true
+
+climate:
+  - platform: mitsubishi_msc
+    id: ac
+    name: None
+    receiver_id: ir_receiver
+    transmitter_id: ir_transmitter
+
+select:
+  - platform: mitsubishi_msc
+    mitsubishi_msc_id: ac
+    name: "Vertical Vane"

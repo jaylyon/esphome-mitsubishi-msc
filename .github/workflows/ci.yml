@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build protocol tests
+        run: g++ -std=c++17 -Wall -Wextra -Werror -I components/mitsubishi_msc tests/test_protocol.cpp -o /tmp/test_protocol
+      - name: Run protocol tests
+        run: /tmp/test_protocol
+
+  esphome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install ESPHome
+        run: pip install esphome
+      - name: Validate config
+        run: esphome config tests/ci-config.yaml
+      - name: Compile firmware
+        run: esphome compile tests/ci-config.yaml
